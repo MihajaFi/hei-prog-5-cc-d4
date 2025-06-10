@@ -72,3 +72,84 @@ class Snake {
     return rest.some(p => p.equals(head));
   }
 }
+
+class Game {
+  snake: Snake;
+  food: Point;
+  score: number = 0;
+
+  constructor() {
+    this.snake = new Snake(new Point(5, 5), Direction.RIGHT);
+    this.food = FoodFactory.create(this.snake);
+  }
+
+  tick(): void {
+    const nextHead = this.snake.getNextHead();
+    console.log(`Le serpent avance à [${nextHead.x}, ${nextHead.y}]`);
+
+    if (nextHead.equals(this.food)) {
+      this.snake.grow();
+      this.food = FoodFactory.create(this.snake);
+      this.score++;
+      console.log("Miam ! Le serpent a mangé la nourriture.");
+    } else {
+      this.snake.move();
+    }
+
+    if (this.snake.hitWall()) {
+      console.log("Boom ! Le serpent a touché un mur.");
+      this.gameOver();
+    } else if (this.snake.hitSelf()) {
+      console.log("Aïe ! Le serpent s'est mordu.");
+      this.gameOver();
+    } else {
+      this.draw();
+    }
+  }
+
+  draw(): void {
+    const grid = Array.from({ length: 10 }, () =>
+      Array.from({ length: 10 }, () => ".")
+    );
+
+    grid[this.food.y][this.food.x] = "@";
+    for (const part of this.snake.body) {
+      grid[part.y][part.x] = "*";
+    }
+
+    console.clear();
+    console.log(`Score: ${this.score}`);
+    for (const row of grid) {
+      console.log(row.join(" "));
+    }
+    console.log("\nUtilise Z (haut), S (bas), Q (gauche), D (droite).");
+  }
+
+  gameOver(): void {
+    console.clear();
+    console.log("💀 GAME OVER !");
+    console.log(`Ton score : ${this.score}`);
+    process.exit();
+  }
+}
+
+const readline = require("readline");
+readline.emitKeypressEvents(process.stdin);
+process.stdin.setRawMode(true);
+
+const game = new Game();
+game.draw();
+
+process.stdin.on("keypress", (_: any, key: any) => {
+  switch (key.name.toUpperCase()) {
+    case "Z": game.snake.changeDirection(Direction.UP); break;
+    case "S": game.snake.changeDirection(Direction.DOWN); break;
+    case "Q": game.snake.changeDirection(Direction.LEFT); break;
+    case "D": game.snake.changeDirection(Direction.RIGHT); break;
+    case "C": if (key.ctrl) process.exit(); break;
+  }
+});
+
+setInterval(() => {
+  game.tick();
+}, 500);
