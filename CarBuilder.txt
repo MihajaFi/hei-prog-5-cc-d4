@@ -1,0 +1,22 @@
+Car
+    engine
+    color
+    wheel
+    seat
+    sunRoof
+    fuelType
+
+CarBuilder
+
+CheapCar > Sans sunRoof, engine 4cyl
+SportCar > engine V8
+
+Prototype
+Singleton
+Factory
+AbstractFtctory
+CarBuilder
+BuilderDirector
+
+Behavioral
+Stracturale
